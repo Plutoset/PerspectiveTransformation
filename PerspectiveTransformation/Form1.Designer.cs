@@ -32,6 +32,7 @@ namespace PerspectiveTransformation
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.PanelControls = new System.Windows.Forms.Panel();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.RB变形 = new System.Windows.Forms.RadioButton();
             this.RB版面 = new System.Windows.Forms.RadioButton();
             this.BClear = new System.Windows.Forms.Button();
@@ -39,7 +40,6 @@ namespace PerspectiveTransformation
             this.BOpen = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.PanelOrigin = new PerspectiveTransformation.MyPanel();
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.statusStrip1.SuspendLayout();
             this.PanelControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -77,6 +77,19 @@ namespace PerspectiveTransformation
             this.PanelControls.Name = "PanelControls";
             this.PanelControls.Size = new System.Drawing.Size(1200, 75);
             this.PanelControls.TabIndex = 3;
+            // 
+            // trackBar1
+            // 
+            this.trackBar1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.trackBar1.Location = new System.Drawing.Point(740, 0);
+            this.trackBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.trackBar1.Maximum = 50;
+            this.trackBar1.Minimum = 1;
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(460, 75);
+            this.trackBar1.TabIndex = 5;
+            this.trackBar1.Value = 1;
+            this.trackBar1.ValueChanged += new System.EventHandler(this.TrackBar1_ValueChanged);
             // 
             // RB变形
             // 
@@ -127,7 +140,7 @@ namespace PerspectiveTransformation
             this.BTran.TabIndex = 4;
             this.BTran.Text = "透视";
             this.BTran.UseVisualStyleBackColor = true;
-            this.BTran.Click += new System.EventHandler(this.BtTran_Click);
+            this.BTran.Click += new System.EventHandler(this.BTran_Click);
             // 
             // BOpen
             // 
@@ -162,19 +175,8 @@ namespace PerspectiveTransformation
             this.PanelOrigin.Paint += new System.Windows.Forms.PaintEventHandler(this.Panel1_Paint);
             this.PanelOrigin.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseDown);
             this.PanelOrigin.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseMove);
-            this.PanelOrigin.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseUp);
-            // 
-            // trackBar1
-            // 
-            this.trackBar1.Location = new System.Drawing.Point(727, 0);
-            this.trackBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.trackBar1.Maximum = 50;
-            this.trackBar1.Minimum = 1;
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(460, 90);
-            this.trackBar1.TabIndex = 5;
-            this.trackBar1.Value = 1;
-            this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
+            this.PanelOrigin.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseUp);
+
             // 
             // 透视变换器
             // 

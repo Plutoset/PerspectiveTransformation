@@ -19,33 +19,20 @@ namespace PerspectiveTransformation
         private MyPoint _endPoint;
         private List<MyPoint> _myPoints = new List<MyPoint>();
         private Point _mouseFrom, _mouseTo;
-        public bool Drawcord = false;
+        private bool _drawCord = false;
+        private bool _moveCord = false;
         public int ShowScale = 1;
-        public int Offsetx, Offsety;
-        private List<Point> _points = new List<Point>();
+        public int OffsetX, OffsetY;
+        public int MoveOffsetX, MoveOffsetY;
         private int? _changeNumber;
 
         public 透视变换器()
         {
             InitializeComponent();
             UpdateSize();
+            PanelOrigin.MouseWheel += Panel1_MouseWheel;
         }
-
-        private void BtTran_Click(object sender, EventArgs e)
-        {
-            if (_backImage == null) return;
-            RB变形.Enabled = true;
-            RB版面.Enabled = true;
-        }
-
-        private void Panel1_MouseMove(object sender, MouseEventArgs e)
-        {
-            toolStripStatusLabel1.Text = e.Location.ToString();
-            if (e.Button != MouseButtons.Left) return;
-            _mouseTo = e.Location;
-            PanelOrigin.Invalidate();
-        }
-
+        //控件操作
         private void BOpen_Click(object sender, EventArgs e)
         {
             var dialog = new OpenFileDialog();
@@ -54,26 +41,55 @@ namespace PerspectiveTransformation
             _startPoint = null;
             _endPoint = null;
             UpdateSize();
-            UpdateMap(ShowScale, Offsetx, Offsety);
+            UpdateMap(ShowScale, OffsetX, OffsetY);
         }
 
-        private void UpdateMap(int ShowScale, int Offsetx, int Offsety)
+        private void BTran_Click(object sender, EventArgs e)
+        {
+            if (_backImage == null) return;
+            RB变形.Enabled = true;
+            RB版面.Enabled = true;
+        }
+
+        private void BClear_Click(object sender, EventArgs e)
+        {
+            _startPoint = null;
+            _endPoint = null;
+            UpdateMap(ShowScale, OffsetX, OffsetY);
+        }
+
+        private void TrackBar1_ValueChanged(object sender, EventArgs e)
+        {
+            ShowScale = (int)trackBar1.Value;
+            UpdateMap(ShowScale, OffsetX, OffsetY);
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            UpdateSize();
+            if (_sourceImage != null) UpdateMap(ShowScale, OffsetX, OffsetY);
+        }
+
+
+        //更新底图
+        private void UpdateMap(int showScale, int offsetX, int offsetY)
         {
             _backImage?.Dispose();
             if (_sourceImage == null) return;
             _backImage = new Bitmap(PanelOrigin.Width, PanelOrigin.Height);
             var g = Graphics.FromImage(_backImage);
-            g.DrawImage(_sourceImage, new Rectangle((1 - ShowScale) * PanelOrigin.Width / 50 + Offsetx, (1 - ShowScale) * PanelOrigin.Height / 50 + Offsety,
-                (ShowScale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width, (ShowScale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height));
+            g.DrawImage(_sourceImage, new Rectangle((1 - showScale) * PanelOrigin.Width / 50 + offsetX, (1 - showScale) * PanelOrigin.Height / 50 + offsetY,
+                (showScale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width, (showScale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height));
             if (_startPoint != null)
             {
-                var startpoint = ToScreenPoint(_startPoint, ShowScale, Offsetx, Offsety);
-                var endpoint = ToScreenPoint(_endPoint, ShowScale, Offsetx, Offsety);
+                var startpoint = ToScreenPoint(_startPoint, showScale, offsetX, offsetY);
+                var endpoint = ToScreenPoint(_endPoint, showScale, offsetX, offsetY);
                 DrawAll(startpoint, endpoint, g);
             }
             g.Dispose();
             PanelOrigin.Invalidate();
         }
+        //更新尺寸
         private void UpdateSize()
         {
             var panelWidth = ClientRectangle.Width - Margins * 2; ;
@@ -96,22 +112,7 @@ namespace PerspectiveTransformation
             PanelOrigin.Left = (ClientRectangle.Width - panelWidth) / 2;
             PanelOrigin.Top = (ClientRectangle.Height - panelHeight) / 2;
         }
-        private Point ToScreenPoint(MyPoint onePoint, int scale, int offsetX, int offsetY)
-        {
-            var X = (int)(onePoint.X * ((scale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width)) +
-                    offsetX + (1 - scale) * PanelOrigin.Width / 50;
-            var Y = (int)(onePoint.Y * ((scale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height)) +
-                    offsetY + (1 - scale) * PanelOrigin.Height / 50;
-            return new Point(X, Y);
-        }
-        public MyPoint ToTruePoint(Point onePoint, int scale, int offsetX, int offsetY)
-        {
-            var X = (double)(onePoint.X - offsetX - (1 - scale) * PanelOrigin.Width / 50) /
-                    (double)((scale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width);
-            var Y = (double)(onePoint.Y - offsetY - (1 - scale) * PanelOrigin.Height / 50) /
-                    (double)((scale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height);
-            return new MyPoint(X, Y);
-        }
+     
 
         //绘制变形框
         public void DrawAll(Point startPoint, Point endPoint, Graphics g)
@@ -195,13 +196,14 @@ namespace PerspectiveTransformation
             g.DrawLine(new Pen(Color.SteelBlue), new Point(Convert.ToInt32(points[0].X / 3 + points[1].X * 2 / 3), Convert.ToInt32(points[0].Y / 3 + points[1].Y * 2 / 3)),
                    new Point(Convert.ToInt32(points[3].X / 3 + points[2].X * 2 / 3), Convert.ToInt32(points[3].Y / 3 + points[2].Y * 2 / 3)));
         }
-
+        
+        //重绘窗口
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
             if (_backImage != null)
             {
                 e.Graphics.DrawImage(_backImage, 0, 0);
-                if (Drawcord)
+                if (_drawCord)
                 {
                     DrawAll(_mouseFrom, _mouseTo, e.Graphics);
                 }
@@ -211,50 +213,136 @@ namespace PerspectiveTransformation
 
         private void Panel1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left) return;
-            if (_startPoint != null)
+            switch (e.Button)
             {
-                _startPoint = null;
-                UpdateMap(ShowScale, Offsetx, Offsety);
+                case MouseButtons.Left:
+                {
+                    if (_startPoint != null)
+                    {
+                 //       _startPoint = null;
+                        UpdateMap(ShowScale, OffsetX, OffsetY);
+                    }
+                    _mouseFrom = e.Location;
+                    _startPoint = new MyPoint(e.X, e.Y);
+                    _drawCord = true;
+                    break;
+                }
+                case MouseButtons.Middle:
+                    Cursor.Current = Cursors.SizeAll;
+                    _mouseFrom = e.Location;
+                    _moveCord = true;
+                    break;
             }
-            _mouseFrom = e.Location;
-            _startPoint = new MyPoint(e.X, e.Y);
-            Drawcord = true;
         }
 
-        private void panel1_MouseUp(object sender, MouseEventArgs e)
+        private void Panel1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left) return;
-            _endPoint = new MyPoint(e.X, e.Y);
-            UpdateMap(ShowScale, Offsetx, Offsety);
-            Drawcord = false;
-            if (RB变形.Checked == true && RB变形.Enabled == true)
+            switch (e.Button)
             {
-                if(_changeNumber != null) _myPoints[_changeNumber.Value] = _endPoint;
+                case MouseButtons.Left:
+                {
+                    _endPoint = new MyPoint(e.X, e.Y);
+                    _drawCord = false;
+                    if (RB变形.Checked == true && RB变形.Enabled == true)
+                    {
+                        if (_changeNumber != null) _myPoints[_changeNumber.Value] = _endPoint;
+                    }
+                    _startPoint = null;
+                    _endPoint = null;
+                    _changeNumber = null;
+                    break;
+                }
+                case MouseButtons.Middle:
+                    Cursor.Current = Cursors.Default;
+                    OffsetX = MoveOffsetX;
+                    OffsetY = MoveOffsetY;
+                    UpdateMap(ShowScale, OffsetX, OffsetY);
+                    _moveCord = false;
+                    break;
             }
-            _changeNumber = null;
         }
 
-        private void BClear_Click(object sender, EventArgs e)
+        private void Panel1_MouseWheel(object sender, MouseEventArgs e)
         {
-            _startPoint = null;
-            _endPoint = null;
-            UpdateMap(ShowScale, Offsetx, Offsety);
+            bool check = false;
+            switch (e.Delta > 0)
+            {
+                case true when ShowScale < 50:
+                {
+                    ShowScale++;
+                    check = true;
+                    break;
+                    }
+            }
+            switch (e.Delta <= 0)
+            {
+                case true when ShowScale > 1:
+                {
+                    ShowScale--;
+                    check = true;
+                    
+                    break;
+                    }
+            }
+            
+            if (!check) return;
+            Point currentMiddle = MidPoint(ShowScale, OffsetX, OffsetY);
+            OffsetX += (e.Location.X - currentMiddle.X) / 50;
+            OffsetY += (e.Location.Y - currentMiddle.Y) / 50;
+            UpdateMap(ShowScale, OffsetX, OffsetY);
+            trackBar1.Value = ShowScale;
         }
 
-        private void Form1_SizeChanged(object sender, EventArgs e)
+        private void Panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            UpdateSize();
-            if (_sourceImage != null) UpdateMap(ShowScale, Offsetx, Offsety);
+            toolStripStatusLabel1.Text = e.Location.ToString();
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    _mouseTo = e.Location;
+                    panel1.Invalidate();
+                    break;
+                case MouseButtons.Middle:
+                {
+                    if (_moveCord)
+                    {
+                        _mouseTo = e.Location;
+                        MoveOffsetX = OffsetX + _mouseTo.X - _mouseFrom.X;
+                        MoveOffsetY = OffsetY + _mouseTo.Y - _mouseFrom.Y;
+                        UpdateMap(ShowScale, MoveOffsetX, MoveOffsetY);
+                    }
+                    break;
+                }
+            }
         }
 
-     
-        private void trackBar1_ValueChanged(object sender, EventArgs e)
+        //屏幕与图像坐标转换
+        private Point ToScreenPoint(MyPoint onePoint, int scale, int offsetX, int offsetY)
         {
-            ShowScale = (int)trackBar1.Value;
-            UpdateMap(ShowScale, Offsetx, Offsety);
+            var X = (int)(onePoint.X * ((scale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width)) +
+                    offsetX + (1 - scale) * PanelOrigin.Width / 50;
+            var Y = (int)(onePoint.Y * ((scale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height)) +
+                    offsetY + (1 - scale) * PanelOrigin.Height / 50;
+            return new Point(X, Y);
+        }
+        public MyPoint ToTruePoint(Point onePoint, int scale, int offsetX, int offsetY)
+        {
+            var X = (double)(onePoint.X - offsetX - (1 - scale) * PanelOrigin.Width / 50) /
+                    (double)((scale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width);
+            var Y = (double)(onePoint.Y - offsetY - (1 - scale) * PanelOrigin.Height / 50) /
+                    (double)((scale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height);
+            return new MyPoint(X, Y);
+        }
+        public Point MidPoint(int scale, int offsetX, int offsetY)
+        {
+            int X = (1 - scale) * PanelOrigin.Width / 50 + offsetX
+                                                         + ((scale - 1) * 2 * PanelOrigin.Width / 50 + PanelOrigin.Width) / 2;
+            int Y = (1 - scale) * PanelOrigin.Height / 50 + offsetY
+                                                          + ((scale - 1) * 2 * PanelOrigin.Height / 50 + PanelOrigin.Height) / 2;
+            return new Point(X, Y);
         }
     }
+
     public sealed class MyPanel : Control
     {
         public MyPanel()
