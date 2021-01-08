@@ -57,7 +57,7 @@ namespace PerspectiveTransformation
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // LocationLabel
             // 
             this.LocationLabel.Name = "LocationLabel";
             this.LocationLabel.Size = new System.Drawing.Size(110, 31);
@@ -87,8 +87,9 @@ namespace PerspectiveTransformation
             this.BSave.TabIndex = 8;
             this.BSave.Text = "保存";
             this.BSave.UseVisualStyleBackColor = true;
+            this.BSave.Click += new System.EventHandler(this.BSave_Click);
             // 
-            // RB变形
+            // tranRadioButton
             // 
             this.tranRadioButton.AutoSize = true;
             this.tranRadioButton.Dock = System.Windows.Forms.DockStyle.Left;
@@ -101,7 +102,7 @@ namespace PerspectiveTransformation
             this.tranRadioButton.Text = "变形";
             this.tranRadioButton.UseVisualStyleBackColor = true;
             // 
-            // RB版面
+            // drawRadioButton
             // 
             this.drawRadioButton.AutoSize = true;
             this.drawRadioButton.Checked = true;
@@ -169,10 +170,10 @@ namespace PerspectiveTransformation
             this.PanelOrigin.Size = new System.Drawing.Size(926, 491);
             this.PanelOrigin.TabIndex = 0;
             this.PanelOrigin.Text = "mypanel1";
-            this.PanelOrigin.Paint += new System.Windows.Forms.PaintEventHandler(this.Panel1_Paint);
-            this.PanelOrigin.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseDown);
+            this.PanelOrigin.Paint += new System.Windows.Forms.PaintEventHandler(this.PanelOrigin_Paint);
+            this.PanelOrigin.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PanelOrigin_MouseDown);
             this.PanelOrigin.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseMove);
-            this.PanelOrigin.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Panel1_MouseUp);
+            this.PanelOrigin.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PanelOrigin_MouseUp);
             // 
             // 透视变换器
             // 
